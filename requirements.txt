@@ -6,3 +6,6 @@ tensorflow
 joblib
 imblearn
 gunicorn
+flask-talisman
+cryptography
+
