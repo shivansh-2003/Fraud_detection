@@ -8,4 +8,4 @@ imblearn
 gunicorn
 flask-talisman
 cryptography
-
+flask-cors
