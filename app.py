@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, make_response
+from flask import Flask, request, jsonify
 from flask_talisman import Talisman
 from flask_cors import CORS
 from tensorflow.keras.models import load_model
@@ -40,9 +40,10 @@ def predict():
 
     # Simulate additional features required by the model
     transaction_data = {
-        'newbalanceOrig': balance - amount,
-        'oldbalanceDest': np.random.uniform(0, 10000),
-        'newbalanceDest': np.random.uniform(0, 10000) + amount,
+        'transaction_amount': amount,
+        'credit_score': credit_score,
+        'balance': balance,
+        'account_age_days': np.random.randint(1, 365),
         'transaction_frequency': np.random.randint(1, 50),
         'transaction_recency': np.random.randint(1, 365),
         'distance': np.random.uniform(0, 1000),
@@ -54,16 +55,16 @@ def predict():
         'account_status': np.random.choice([0, 1])
     }
 
-    # Prepare the input data
-    features = [
-        'newbalanceOrig', 'oldbalanceDest', 'newbalanceDest', 'transaction_frequency',
-        'transaction_recency', 'distance', 'unusual_activity_flag', 'num_unique_devices',
-        'num_unique_locations', 'blacklist_whitelist_status', 'transaction_amount_deviation',
-        'account_status'
+    # Define the feature names that the scaler was fitted with
+    feature_names = [
+        'transaction_amount', 'credit_score', 'balance', 'account_age_days',
+        'transaction_frequency', 'transaction_recency', 'distance',
+        'unusual_activity_flag', 'num_unique_devices', 'num_unique_locations',
+        'blacklist_whitelist_status', 'transaction_amount_deviation', 'account_status'
     ]
     
     # Create a DataFrame with the appropriate feature names
-    transaction_df = pd.DataFrame([transaction_data], columns=features)
+    transaction_df = pd.DataFrame([transaction_data], columns=feature_names)
     transaction_scaled = scaler.transform(transaction_df)
 
     # Make prediction
