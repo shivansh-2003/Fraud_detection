@@ -5,6 +5,7 @@ from tensorflow.keras.models import load_model
 import numpy as np
 import joblib
 import logging
+import pandas as pd
 
 app = Flask(__name__)
 Talisman(app)
@@ -61,9 +62,10 @@ def predict():
         'account_status'
     ]
     
-    transaction_values = np.array([transaction_data[feature] for feature in features]).reshape(1, -1)
-    transaction_scaled = scaler.transform(transaction_values)
-    
+    # Create a DataFrame with the appropriate feature names
+    transaction_df = pd.DataFrame([transaction_data], columns=features)
+    transaction_scaled = scaler.transform(transaction_df)
+
     # Make prediction
     prediction = model.predict(transaction_scaled)
     transaction_score = prediction[0][0]
