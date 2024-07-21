@@ -7,7 +7,7 @@ import joblib
 
 app = Flask(__name__)
 Talisman(app)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}})  # Allow all origins
 
 # Load the model and scaler
 model = load_model('fraud_detection_model1.keras')
