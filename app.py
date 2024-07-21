@@ -60,4 +60,19 @@ def predict():
         'num_unique_locations', 'blacklist_whitelist_status', 'transaction_amount_deviation',
         'account_status'
     ]
-  
+    
+    transaction_values = np.array([transaction_data[feature] for feature in features]).reshape(1, -1)
+    transaction_scaled = scaler.transform(transaction_values)
+    
+    # Make prediction
+    prediction = model.predict(transaction_scaled)
+    transaction_score = prediction[0][0]
+    is_fraud = transaction_score > 0.3  # Adjust threshold as needed
+
+    return jsonify({
+        'transaction_score': float(transaction_score),
+        'is_fraud': bool(is_fraud)
+    })
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=5000)
