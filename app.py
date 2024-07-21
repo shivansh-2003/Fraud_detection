@@ -1,32 +1,28 @@
 from flask import Flask, request, jsonify
-from flask_talisman import Talisman
 from flask_cors import CORS
 from tensorflow.keras.models import load_model
 import numpy as np
 import joblib
-import logging
 import pandas as pd
 
 app = Flask(__name__)
-Talisman(app)
-
-# Setup CORS: Allow all origins with specific methods and headers
-cors = CORS(app, resources={r"/*": {"origins": "*", "methods": ["GET", "POST"], "allow_headers": ["Content-Type"]}})
-
-# Enable logging
-logging.basicConfig(level=logging.INFO)
+CORS(app)  # Enable CORS
 
 # Load the model and scaler
 model = load_model('fraud_detection_model1.keras')
 scaler = joblib.load('scaler1.pkl')
 
+# Define feature names used for scaling
+feature_names = [
+    'transaction_amount', 'transaction_frequency', 'distance', 'account_age_days',
+    'transaction_recency', 'unusual_activity_flag', 'num_unique_devices', 'num_unique_locations',
+    'blacklist_whitelist_status', 'transaction_amount_deviation', 'credit_score', 'account_status'
+]
+
 @app.route('/predict', methods=['POST'])
 def predict():
     data = request.json
-    logging.info(f'Received data: {data}')
-    
     if not data:
-        logging.error('No data provided')
         return jsonify({'error': 'No data provided'}), 400
 
     # Extract required fields
@@ -34,15 +30,13 @@ def predict():
     credit_score = data.get('credit_score')
     balance = data.get('balance')
 
-    if amount is None or credit_score is None or balance is None:
-        logging.error('Missing required fields')
+    if amount is None or credit_score is None:
         return jsonify({'error': 'Missing required fields'}), 400
 
-    # Simulate additional features required by the model
+    # Simulate additional features
     transaction_data = {
         'transaction_amount': amount,
         'credit_score': credit_score,
-        'balance': balance,
         'account_age_days': np.random.randint(1, 365),
         'transaction_frequency': np.random.randint(1, 50),
         'transaction_recency': np.random.randint(1, 365),
@@ -55,16 +49,10 @@ def predict():
         'account_status': np.random.choice([0, 1])
     }
 
-    # Define the feature names that the scaler was fitted with
-    feature_names = [
-        'transaction_amount', 'credit_score', 'balance', 'account_age_days',
-        'transaction_frequency', 'transaction_recency', 'distance',
-        'unusual_activity_flag', 'num_unique_devices', 'num_unique_locations',
-        'blacklist_whitelist_status', 'transaction_amount_deviation', 'account_status'
-    ]
-    
-    # Create a DataFrame with the appropriate feature names
+    # Create DataFrame for scaling
     transaction_df = pd.DataFrame([transaction_data], columns=feature_names)
+    
+    # Transform the data using the scaler
     transaction_scaled = scaler.transform(transaction_df)
 
     # Make prediction
