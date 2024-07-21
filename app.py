@@ -5,7 +5,6 @@ import numpy as np
 import joblib
 
 app = Flask(__name__)
-Talisman(app)
 CORS(app, resources={r"/*": {"origins": "*"}})  # Allow all origins
 
 # Load the model and scaler
