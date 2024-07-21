@@ -1,11 +1,19 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, make_response
+from flask_talisman import Talisman
 from flask_cors import CORS
 from tensorflow.keras.models import load_model
 import numpy as np
 import joblib
+import logging
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})  # Allow all origins
+Talisman(app)
+
+# Setup CORS: Allow all origins with specific methods and headers
+cors = CORS(app, resources={r"/*": {"origins": "*", "methods": ["GET", "POST"], "allow_headers": ["Content-Type"]}})
+
+# Enable logging
+logging.basicConfig(level=logging.INFO)
 
 # Load the model and scaler
 model = load_model('fraud_detection_model1.keras')
@@ -14,7 +22,10 @@ scaler = joblib.load('scaler1.pkl')
 @app.route('/predict', methods=['POST'])
 def predict():
     data = request.json
+    logging.info(f'Received data: {data}')
+    
     if not data:
+        logging.error('No data provided')
         return jsonify({'error': 'No data provided'}), 400
 
     # Extract required fields
@@ -23,6 +34,7 @@ def predict():
     balance = data.get('balance')
 
     if amount is None or credit_score is None or balance is None:
+        logging.error('Missing required fields')
         return jsonify({'error': 'Missing required fields'}), 400
 
     # Simulate additional features required by the model
@@ -48,19 +60,4 @@ def predict():
         'num_unique_locations', 'blacklist_whitelist_status', 'transaction_amount_deviation',
         'account_status'
     ]
-    
-    transaction_values = np.array([transaction_data[feature] for feature in features]).reshape(1, -1)
-    transaction_scaled = scaler.transform(transaction_values)
-    
-    # Make prediction
-    prediction = model.predict(transaction_scaled)
-    transaction_score = prediction[0][0]
-    is_fraud = transaction_score > 0.3  # Adjust threshold as needed
-
-    return jsonify({
-        'transaction_score': float(transaction_score),
-        'is_fraud': bool(is_fraud)
-    })
-
-if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=10000)
+  
