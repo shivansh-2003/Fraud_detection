@@ -1,11 +1,7 @@
+
 Flask
-numpy
-pandas
-scikit-learn
+Flask-CORS
 tensorflow
+numpy
 joblib
-imblearn
 gunicorn
-flask-talisman
-cryptography
-flask-cors
