@@ -1,7 +1,6 @@
-
 Flask
-Flask-CORS
+flask-talisman
+flask-cors
 tensorflow
 numpy
 joblib
-gunicorn
