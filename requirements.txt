@@ -4,4 +4,4 @@ flask-cors
 tensorflow
 numpy
 joblib
-gunicorn
+scikit-learn
