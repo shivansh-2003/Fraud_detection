@@ -1,5 +1,4 @@
 from flask import Flask, request, jsonify
-from flask_talisman import Talisman
 from flask_cors import CORS
 from tensorflow.keras.models import load_model
 import numpy as np
@@ -65,4 +64,4 @@ def predict():
     })
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=10000)
